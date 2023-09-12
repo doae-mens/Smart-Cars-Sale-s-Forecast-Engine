@@ -1,0 +1,92 @@
+#Tensorflow and Keras and sklearn
+import tensorflow as tf
+model = Sequential()
+
+# The Embedding Layer
+model.add(Embedding(VOCAB_SIZE, EMBED_SIZE, input_length=MAX_SEQUENCE_LENGTH))
+# The first one dimensional convolutional layer (32,4,same,relu)
+model.add(Conv1D(filters=32, kernel_size=4, padding='same', activation='relu'))
+model.add(Conv1D(filters=32, kernel_size=4, padding='same', activation='relu'))
+# The first Max pooling layer (2)
+model.add(MaxPooling1D(pool_size=2))
+# The first Dropout layer (10%)
+model.add(Dropout(rate=0.10))
+# The second one dimensional convolutional layer (32,4,same,relu)
+model.add(Conv1D(filters=64, kernel_size=4, padding='same', activation='relu'))
+model.add(Conv1D(filters=64, kernel_size=4, padding='same', activation='relu'))
+# The second Max pooling layer (2)
+model.add(MaxPooling1D(pool_size=2))
+# The second Dropout layer (10%)
+model.add(Dropout(rate=0.10))
+# The third one dimensional convolutional layer (32,4,same,relu)
+model.add(Conv1D(filters=64, kernel_size=4, padding='same', activation='relu'))
+model.add(Conv1D(filters=64, kernel_size=4, padding='same', activation='relu'))
+# The third Max pooling layer (2)
+model.add(MaxPooling1D(pool_size=2))
+# The third Dropout layer (10%)
+model.add(Dropout(rate=0.10))
+# The Flattening layer
+model.add(Flatten())
+# The First Dense Layer (256,relu)
+model.add(Dense(256, activation='relu'))
+# The Second Dense Layer or Prediction layer (1,sigmoid)
+model.add(Dense(5, activation='softmax'))
+
+# Compiling the Model using the Binary_Crossontropy as a loss function and accuracy as a meseaure and Adam as an Optimizer
+model.compile(loss='SparseCategoricalCrossentropy', optimizer=tf.keras.optimizers.Adam(1e-4), metrics=['accuracy'])
+# Displaying the Model Schema
+model.summary()
+
+# Training the Model with GPU
+with tf.device('/GPU:0'):
+    history1 = model.fit(X_train, y_train, validation_data=(X_val,y_val),epochs=20, batch_size=64, verbose=1, callbacks=[callback])
+
+# Performance Plot
+
+def plot_performance(history=None, figure_directory=None, ylim_pad=[0, 0]):
+    xlabel = 'Epoch'
+    legends = ['Training', 'Validation']    
+    plt.figure(figsize=(20, 5))
+
+    y1 = history.history['accuracy']
+    y2 = history.history['val_accuracy']
+
+    min_y = min(min(y1), min(y2))-ylim_pad[0]
+    max_y = max(max(y1), max(y2))+ylim_pad[0]
+
+
+    plt.subplot(121)
+
+    plt.plot(y1)
+    plt.plot(y2)
+
+    plt.title('Model Accuracy\n'+date_time(1), fontsize=17)
+    plt.xlabel(xlabel, fontsize=15)
+    plt.ylabel('Accuracy', fontsize=15)
+    plt.ylim(min_y, max_y)
+    plt.legend(legends, loc='upper left')
+    plt.grid()
+
+    y1 = history.history['loss']
+    y2 = history.history['val_loss']
+
+    min_y = min(min(y1), min(y2))-ylim_pad[1]
+    max_y = max(max(y1), max(y2))+ylim_pad[1]
+    plt.subplot(122)
+
+    plt.plot(y1)
+    plt.plot(y2)
+
+    plt.title('Model Loss\n'+date_time(1), fontsize=17)
+    plt.xlabel(xlabel, fontsize=15)
+    plt.ylabel('Loss', fontsize=15)
+    plt.ylim(min_y, max_y)
+    plt.legend(legends, loc='upper left')
+    plt.grid()
+    if figure_directory:
+        plt.savefig(figure_directory+"/history")
+
+    plt.show()
+
+scores = model.evaluate(X_test, y_test, verbose=1)
+print("Accuracy: %.2f%%" % (scores[1]*100))
