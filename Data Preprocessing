@@ -1,0 +1,34 @@
+import pandas as pd
+import re
+import nltk
+import spacy
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+import spacy.cli
+spacy.cli.download("pt_core_news_sm")
+import pt_core_news_sm
+spc_pt = pt_core_news_sm.load()
+root_path = 'Databeses/'
+data  = pd.read_csv(root_path + 'Tweets.csv')
+#Text pre-processing
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+stopwords_pt = stopwords.words("english")
+def limpa_texto(texto):
+  '''(str) -> str
+
+   This function takes a string, makes everything lowercase, filters only letters, strips stopwords, lemmatizes and returns the resulting string.
+  '''
+  texto = texto.lower()
+
+  texto = re.sub(r"[\W\d_]+", " ", texto)
+
+  texto = [pal for pal in texto.split() if pal not in stopwords_pt]
+
+  spc_texto = spc_pt(" ".join(texto))
+  tokens = [word.lemma_ if word.lemma_ != "-PRON-" else word.lower_ for word in spc_texto]
+  
+  return " ".join(tokens)
+data['Comments'] = data['Comments'].apply(limpa_texto)
