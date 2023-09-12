@@ -1,0 +1,33 @@
+import textblob
+
+
+
+# Copying the data into new dataframe called textblob_data
+textblob_data=data.copy()
+# Creating additional columns containing polarity score , subjectivity and overall sentiment 
+sentiment=[]
+subjectivity=[]
+sentiment_score=[]
+for i in textblob_data['Comments'].values:
+    Tweet = textblob.TextBlob(i)
+    sentiment_score.append(Tweet.sentiment[0])
+    if Tweet.sentiment[0]<0:
+        sentiment.append('Negative')
+    elif Tweet.sentiment[0]>0:
+        sentiment.append('Positive')
+    else:
+        sentiment.append('Neutral')
+    subjectivity.append(Tweet.sentiment[1])
+
+textblob_data['Sentiment Score']=sentiment_score
+textblob_data['Subjectivity']=subjectivity
+textblob_data['Overall Sentiment']=sentiment
+
+px.histogram(data_frame=textblob_data,x='Sentiment Score',color='Overall Sentiment')
+
+sns.countplot(textblob_data['Overall Sentiment'])
+
+print('The sentence is :',textblob_data['Comments'][1])
+textblob_data.iloc[6,1:]
+
+
